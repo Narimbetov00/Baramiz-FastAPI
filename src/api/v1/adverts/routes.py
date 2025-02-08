@@ -16,13 +16,24 @@ def add_base_url_to_file(advert):
     advert["file"] = f"http://{BASE_URL}/{advert['file']}"
     return advert
 
+def one_add_base_url_to_file(advert):
+    advert.file = f"http://{BASE_URL}/{advert.file}"
+    return advert
+
 MEDIA_FOLDER = "media"
 os.makedirs(MEDIA_FOLDER, exist_ok=True)
 
-@advert_route.post('/',response_model=AdvertModel)
-async def add_advert(title: str, description: str, link: str,file:UploadFile=File(...),user=Depends(get_current_user)):
+@advert_route.post("/", response_model=AdvertModel)
+async def add_advert(
+    title: str = Form(...), 
+    description: str = Form(...), 
+    link: str = Form(...), 
+    file: UploadFile = File(...), 
+    user=Depends(get_current_user)
+):
     if not user.is_verified:
-        raise HTTPException(status_code=403,detail="Tastiyqlanbagan paydalaniwshilarga ruxsat joq!")
+        raise HTTPException(status_code=403, detail="Tastiyqlanbagan paydalaniwshilarga ruxsat joq!")
+
     unique_filename = f"{uuid.uuid4()}-{file.filename}"
     file_path = f"{MEDIA_FOLDER}/{unique_filename}"
    
@@ -35,8 +46,7 @@ async def add_advert(title: str, description: str, link: str,file:UploadFile=Fil
         link=link,
         file=file_path
     )
-    return map(add_base_url_to_file, advert)
-
+    return one_add_base_url_to_file(advert)
 
 @advert_route.get("/",response_model=List[AdvertModel])
 async def get_all_adverts():
@@ -50,7 +60,7 @@ async def get_all_adverts():
 async def get_advert(advert_id:str):
     advert = await Adverts.get_or_none(id=advert_id)
     if advert:
-        return map(add_base_url_to_file, advert)
+        return one_add_base_url_to_file(advert)
     raise HTTPException(status_code=404,detail="Not Found")
 
 @advert_route.put("/{advert_id}",response_model=AdvertModel)
