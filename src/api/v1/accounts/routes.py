@@ -22,7 +22,8 @@ async def create_user_account(user_data: UserCreateModel):
         raise HTTPException(status_code=400,detail="User Already exists")
     
     new_user = await User.create(username=username,password_hash=passwd_hash)
-    return new_user
+    return {"id":new_user.id,"username":new_user.username,"created_at":new_user.created_at}
+
     
 @auth_router.post("/login")
 async def login_users(login_data: UserLoginModel):
@@ -62,7 +63,7 @@ async def login_users(login_data: UserLoginModel):
                 }
             )
 
-    raise HTTPException(status_code=500,detail="Oops! ... Something went wrong")
+    raise HTTPException(status_code=400,detail="Username Or Password Wrong!")
 
 @auth_router.get("/refresh_token")
 async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer)):

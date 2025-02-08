@@ -25,7 +25,7 @@ async def startup():
 async def shutdown():
     await close_db()
 
-@app.get("/")
+@app.get("/",tags=["Baramiz API"])
 async def view():
     return {"message":"Welcome to Baramiz OPEN API View"}
 
